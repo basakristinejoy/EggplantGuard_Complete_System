@@ -1,0 +1,1 @@
+Create the four class-named folders described in README.md and place your labeled training images inside them.

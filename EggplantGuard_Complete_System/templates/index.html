@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EggplantGuard | AI Eggplant Quality & Foliar Disease Diagnostic System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <!-- Floating Toast Notification System -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Header Navigation -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <div class="brand-badge-icon">🍆</div>
+        <div>
+          <span class="brand-title">Eggplant<span class="accent-purple">Guard</span></span>
+          <span class="brand-sub">AI Crop Quality &amp; Foliar Disease System</span>
+        </div>
+      </div>
+      <nav class="nav-links">
+        <a href="#dashboard" class="nav-item">Dashboard</a>
+        <a href="#scanner" class="nav-item">Diagnostic Scanner</a>
+        <a href="#classes" class="nav-item">Target Conditions</a>
+        <a href="#history" class="nav-item">Scan History</a>
+        <a href="#about" class="nav-item">About System</a>
+      </nav>
+      <div class="model-badge" id="navModelStatus">
+        <span class="status-indicator ready" id="statusDot"></span>
+        <span id="modelStatusText">Engine Active</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+
+    <!-- Hero Section & Real-Time Stats -->
+    <section class="hero-section" id="dashboard">
+      <div class="hero-grid">
+        <div class="hero-text">
+          <div class="hero-pill">
+            <span class="pill-dot"></span> Ultralytics YOLO &amp; Precision Vision Engine
+          </div>
+          <h1 class="hero-title">
+            Smart Crop Screening for <br>
+            <span class="highlight-green">Eggplant Foliage</span> &amp; <span class="highlight-purple">Fruit Viability</span>
+          </h1>
+          <p class="hero-description">
+            EggplantGuard provides instant, computer-vision diagnostic screening of eggplant leaves and fruits. Screen for leaf miner serpentine trails, fruit borer entry holes, and commercial market freshness in seconds.
+          </p>
+          <div class="hero-actions">
+            <a href="#scanner" class="btn btn-primary">
+              <span class="btn-icon">📷</span> Start Diagnostic Scan
+            </a>
+            <a href="#history" class="btn btn-outline">
+              <span class="btn-icon">📊</span> View Audit Log
+            </a>
+          </div>
+        </div>
+
+        <!-- Dashboard Stat Cards -->
+        <div class="hero-stats-panel">
+          <div class="stat-card stat-total">
+            <div class="stat-icon-wrapper icon-total">📈</div>
+            <div class="stat-info">
+              <span class="stat-label">Total Audited Scans</span>
+              <h3 class="stat-value" id="statTotalScans">0</h3>
+            </div>
+          </div>
+          <div class="stat-card stat-healthy">
+            <div class="stat-icon-wrapper icon-healthy">🌿</div>
+            <div class="stat-info">
+              <span class="stat-label">Healthy Leaf Samples</span>
+              <h3 class="stat-value" id="statHealthyLeaf">0</h3>
+            </div>
+          </div>
+          <div class="stat-card stat-fresh">
+            <div class="stat-icon-wrapper icon-fresh">🍆</div>
+            <div class="stat-info">
+              <span class="stat-label">Market-Ready Fruit</span>
+              <h3 class="stat-value" id="statFreshFruit">0</h3>
+            </div>
+          </div>
+          <div class="stat-card stat-issues">
+            <div class="stat-icon-wrapper icon-issues">⚠️</div>
+            <div class="stat-info">
+              <span class="stat-label">Pest &amp; Damage Alerts</span>
+              <h3 class="stat-value" id="statPestIssues">0</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scanner Section -->
+    <section class="section scanner-section" id="scanner">
+      <div class="section-header">
+        <span class="section-tag">01 / DIAGNOSTIC SCANNER</span>
+        <h2 class="section-title">Scan Eggplant Sample</h2>
+        <p class="section-subtitle">Upload a clear close-up photo of an eggplant leaf or fruit, or capture directly with your live camera.</p>
+      </div>
+
+      <div class="scanner-layout">
+        <!-- Input & Preview Card -->
+        <div class="card scanner-card">
+          <div class="tab-controls">
+            <button class="tab-btn active" id="tabUpload">
+              <span class="tab-icon">📁</span> Upload Image
+            </button>
+            <button class="tab-btn" id="tabCamera">
+              <span class="tab-icon">📸</span> Live Camera
+            </button>
+          </div>
+
+          <!-- File Upload Dropzone -->
+          <div class="tab-content" id="uploadPane">
+            <div class="dropzone" id="dropzone" title="Click or drag and drop an image here">
+              <div class="dropzone-visual">
+                <div class="dropzone-circle">
+                  <span class="dropzone-arrow">↑</span>
+                </div>
+              </div>
+              <h3 class="dropzone-title">Click to browse or drop an eggplant photo</h3>
+              <p class="dropzone-text">Accepts JPG, JPEG, PNG, WEBP · Up to 10 MB</p>
+              <div class="dropzone-tips">
+                <span class="tip-badge">💡 Tip: Center a single leaf or fruit in clear daylight</span>
+              </div>
+              <input type="file" id="fileInput" accept="image/*,.jpg,.jpeg,.png,.webp" class="visually-hidden">
+            </div>
+          </div>
+
+          <!-- Live Camera Viewfinder -->
+          <div class="tab-content hidden" id="cameraPane">
+            <div class="camera-stream-wrapper">
+              <video id="cameraVideo" autoplay playsinline muted></video>
+              <canvas id="captureCanvas" class="visually-hidden"></canvas>
+              
+              <!-- Viewfinder Crosshairs -->
+              <div class="viewfinder-overlay" id="viewfinderOverlay">
+                <div class="viewfinder-reticle">
+                  <span class="corner tl"></span>
+                  <span class="corner tr"></span>
+                  <span class="corner bl"></span>
+                  <span class="corner br"></span>
+                  <span class="viewfinder-hint">Align Leaf or Fruit Here</span>
+                </div>
+              </div>
+
+              <!-- Idle Placeholder -->
+              <div class="camera-overlay" id="cameraPlaceholder">
+                <span class="camera-guide-icon">🎥</span>
+                <p>Camera is currently standby. Click below to start video feed.</p>
+              </div>
+            </div>
+
+            <div class="camera-toolbar">
+              <button class="btn btn-secondary" id="btnStartCamera">
+                <span>Start Stream</span>
+              </button>
+              <button class="btn btn-primary" id="btnCapture" disabled>
+                <span>Capture Snapshot</span>
+              </button>
+              <button class="btn btn-ghost" id="btnStopCamera" disabled>
+                <span>Stop</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Interactive Preview Area with Scan Laser Effect -->
+          <div class="preview-container hidden" id="previewContainer">
+            <div class="preview-media-box">
+              <img id="previewImage" alt="Selected eggplant sample preview">
+              <div class="laser-scanner" id="laserScanner"></div>
+            </div>
+            <div class="preview-details">
+              <div class="preview-file-info">
+                <span class="preview-filename" id="previewFileName">sample.jpg</span>
+                <span class="preview-filesize" id="previewFileSize">1.2 MB</span>
+              </div>
+              <button class="btn btn-sm btn-ghost text-danger" id="btnClearImage" title="Remove selected image">
+                ✕ Remove
+              </button>
+            </div>
+          </div>
+
+          <!-- Run Classification Action -->
+          <div class="scan-action-wrap">
+            <button class="btn btn-primary btn-block btn-scan" id="btnClassify" disabled>
+              <span id="btnScanText">Analyze Sample with AI</span>
+              <span class="btn-arrow">→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- AI Classification Result Card -->
+        <div class="card result-card" id="resultsCard">
+          <div class="card-header">
+            <span class="section-tag">02 / DIAGNOSTIC RESULT</span>
+            <h3 class="card-title">Classification &amp; Field Guidance</h3>
+          </div>
+
+          <!-- Empty State -->
+          <div class="result-empty" id="resultEmpty">
+            <div class="empty-icon-wrap">
+              <span class="empty-icon">🔍</span>
+            </div>
+            <h4 class="empty-title">Ready for Image Input</h4>
+            <p class="empty-desc">Select an eggplant photo above or take a photo with your camera. The AI will inspect the specimen and provide tailored field management actions.</p>
+          </div>
+
+          <!-- Populated Result State -->
+          <div class="result-body hidden" id="resultBody">
+            <div class="result-top">
+              <div class="result-badge-row">
+                <span class="badge" id="categoryBadge">Diagnosis Pending</span>
+                <span class="engine-badge" id="engineBadge">Vision Engine</span>
+              </div>
+              <h2 class="result-category" id="resultCategory">Category Name</h2>
+              <p class="result-condition-text" id="resultConditionText">Detailed condition description will appear here.</p>
+            </div>
+
+            <!-- Warning Card if Invalid/Non-Eggplant Sample -->
+            <div class="invalid-sample-notice hidden" id="invalidSampleNotice">
+              <div class="notice-icon">⚠️</div>
+              <div class="notice-content">
+                <strong>Non-Eggplant Sample Detected:</strong>
+                <p>The system could not identify characteristic eggplant foliage or fruit pigments. Please ensure you upload a close-up photo of an actual eggplant leaf or fruit.</p>
+              </div>
+            </div>
+
+            <!-- Confidence Meter -->
+            <div class="confidence-box" id="confidenceBox">
+              <div class="confidence-header">
+                <span>Model Confidence</span>
+                <span class="confidence-value" id="resultConfidence">0.0%</span>
+              </div>
+              <div class="meter-bar">
+                <div class="meter-fill" id="meterFill"></div>
+              </div>
+            </div>
+
+            <!-- Agronomic Recommendations -->
+            <div class="recommendations-box" id="recommendationsBox">
+              <h4 class="rec-heading" id="recHeading">
+                <span class="rec-icon">💡</span> Recommended Agronomic Actions
+              </h4>
+              <ul class="rec-list" id="recommendationList">
+                <!-- Dynamically populated -->
+              </ul>
+            </div>
+
+            <div class="result-footer">
+              <span class="result-timestamp" id="resultTimestamp">Scanned: --</span>
+              <p class="disclaimer-note">
+                ℹ️ <strong>Field Guidance Disclaimer:</strong> EggplantGuard is an educational screening system. Always verify severe or atypical symptoms with a certified agricultural extension officer.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Target Conditions Overview (Including Non-Eggplant Guard) -->
+    <section class="section classes-section" id="classes">
+      <div class="section-header">
+        <span class="section-tag">03 / TARGET CONDITIONS</span>
+        <h2 class="section-title">Diagnostic Classes &amp; Screening Criteria</h2>
+        <p class="section-subtitle">EggplantGuard recognizes 4 primary crop conditions plus out-of-distribution invalid inputs.</p>
+      </div>
+
+      <div class="class-cards-grid">
+        <article class="class-card">
+          <div class="class-card-header">
+            <div class="class-icon-circle green">🌿</div>
+            <span class="class-status-pill green">Foliar Health</span>
+          </div>
+          <h3 class="class-name">Healthy Leaf</h3>
+          <p class="class-desc">Intact green blade lamina with normal venation, clean cuticle, and complete absence of serpentine mines or fungal lesions.</p>
+          <div class="class-key-points">
+            <span>✔ Optimal chlorophyll density</span>
+            <span>✔ No mechanical or insect wounds</span>
+          </div>
+        </article>
+
+        <article class="class-card">
+          <div class="class-card-header">
+            <div class="class-icon-circle amber">🍂</div>
+            <span class="class-status-pill amber">Pest Infestation</span>
+          </div>
+          <h3 class="class-name">Leaf Miner Damage</h3>
+          <p class="class-desc">Infestation by <em>Liriomyza</em> fly larvae that feed inside the leaf mesophyll, leaving distinct serpentine white/grey tunnels.</p>
+          <div class="class-key-points">
+            <span>✔ Serpentine translucent mines</span>
+            <span>✔ Diminished photosynthetic area</span>
+          </div>
+        </article>
+
+        <article class="class-card">
+          <div class="class-card-header">
+            <div class="class-icon-circle purple">🍆</div>
+            <span class="class-status-pill purple">Market Grade</span>
+          </div>
+          <h3 class="class-name">Fresh / Market-Ready Fruit</h3>
+          <p class="class-desc">Physiologically mature, firm, glossy fruit exhibiting characteristic cultivar color, vibrant green calyx, and zero punctures.</p>
+          <div class="class-key-points">
+            <span>✔ Firm texture &amp; glossy sheen</span>
+            <span>✔ Unblemished commercial quality</span>
+          </div>
+        </article>
+
+        <article class="class-card">
+          <div class="class-card-header">
+            <div class="class-icon-circle red">🐛</div>
+            <span class="class-status-pill red">Crop Loss Alert</span>
+          </div>
+          <h3 class="class-name">Damaged / Borer-Infested Fruit</h3>
+          <p class="class-desc">Severe economic damage from the Eggplant Fruit &amp; Shoot Borer (<em>Leucinodes orbonalis</em>). Identified by boreholes and frass deposits.</p>
+          <div class="class-key-points">
+            <span>✔ Entrance holes with brown frass</span>
+            <span>✔ Internal tunneling &amp; soft rot</span>
+          </div>
+        </article>
+      </div>
+
+      <!-- Out-of-Distribution / Non-Eggplant Note -->
+      <div class="non-eggplant-banner">
+        <div class="banner-icon">🛡️</div>
+        <div>
+          <h4>Non-Eggplant Sample Protection:</h4>
+          <p>If an uploaded image contains a non-eggplant object (e.g. human face, vehicle, animal, or blank surface), the system flags it as an <strong>Invalid / Non-Eggplant Sample</strong> to avoid false diagnoses.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scan History Audit Trail -->
+    <section class="section history-section" id="history">
+      <div class="section-header flex-header">
+        <div>
+          <span class="section-tag">04 / AUDIT TRAILS</span>
+          <h2 class="section-title">Diagnostic History &amp; Records</h2>
+          <p class="section-subtitle">Persistent SQLite database records of every scan.</p>
+        </div>
+        <div class="history-controls">
+          <input type="text" id="searchHistory" class="search-input" placeholder="🔍 Search by filename...">
+          <select id="filterCategory" class="select-input">
+            <option value="">All Categories</option>
+            <option value="Healthy Leaf">Healthy Leaf</option>
+            <option value="Leaf Miner Damage">Leaf Miner Damage</option>
+            <option value="Fresh-Market-Ready Fruit">Fresh-Market-Ready Fruit</option>
+            <option value="Damaged-Borer-Infested Fruit">Damaged-Borer-Infested Fruit</option>
+            <option value="Invalid / Non-Eggplant Sample">Invalid / Non-Eggplant Sample</option>
+          </select>
+          <a href="/api/history/export" class="btn btn-secondary btn-sm" id="btnExportCSV">
+            <span>📥 Export CSV</span>
+          </a>
+          <button class="btn btn-danger btn-sm" id="btnClearAllHistory">
+            <span>🗑️ Reset Records</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card table-card">
+        <div class="table-responsive">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Scan ID</th>
+                <th>Sample Filename</th>
+                <th>AI Classification</th>
+                <th>Confidence</th>
+                <th>Timestamp</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <tr>
+                <td colspan="6" class="table-empty">Loading diagnostic audit trail...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="section about-section" id="about">
+      <div class="card about-card">
+        <div class="about-grid">
+          <div>
+            <span class="section-tag">05 / SYSTEM SPECS</span>
+            <h2 class="about-title">About EggplantGuard</h2>
+            <p class="about-p">
+              EggplantGuard is an open, transparent agricultural AI diagnostic tool built with <strong>Ultralytics YOLO</strong>, <strong>Flask</strong>, and <strong>SQLite</strong>. Engineered specifically for smallholder growers, agronomists, and IT students, it replaces closed black-box models with an auditable computer vision pipeline.
+            </p>
+            <div class="tech-stack-pills">
+              <span class="tech-pill">Python Flask 3</span>
+              <span class="tech-pill">Ultralytics YOLO</span>
+              <span class="tech-pill">HSV Color Analysis</span>
+              <span class="tech-pill">SQLite 3</span>
+              <span class="tech-pill">HTML5 Canvas Camera</span>
+            </div>
+          </div>
+          <div class="guidelines-card">
+            <h4 class="guidelines-title">Field Photography Best Practices</h4>
+            <ul class="guidelines-list">
+              <li><strong>Focus:</strong> Hold the camera 15–30 cm away so leaf veins and fruit skins are in sharp focus.</li>
+              <li><strong>Lighting:</strong> Take scans under natural, indirect daylight to prevent glare or deep shadow.</li>
+              <li><strong>Background:</strong> Position the leaf or fruit in center view; avoid human hands or busy ground cover.</li>
+              <li><strong>Cleanliness:</strong> Wipe dirt and water droplets off the leaf before scanning.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modern Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <p class="footer-copy">
+        🍆 <strong>EggplantGuard</strong> · Eggplant Fruit Quality and Leaf Disease Classification System
+      </p>
+      <p class="footer-meta">
+        Flask &amp; Ultralytics YOLO Architecture · SQLite Audited
+      </p>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
